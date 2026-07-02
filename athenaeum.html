@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Athenaeum — Audiobook Shelf</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#0b0f1a;
+    --bg-1:#121a2b;
+    --bg-2:#1a2438;
+    --amber:#d9a55a;
+    --amber-soft:#e8c48f;
+    --teal:#5fb8ab;
+    --glass:rgba(255,255,255,0.055);
+    --glass-brd:rgba(255,255,255,0.10);
+    --glass-brd-hi:rgba(217,165,90,0.45);
+    --ink-0:#f2ede3;
+    --ink-1:#c7c2b8;
+    --ink-2:#8b8a8f;
+    --danger:#d9705f;
+    --radius:18px;
+    --font-display:'Fraunces', serif;
+    --font-body:'Inter', sans-serif;
+    --font-mono:'JetBrains Mono', monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse 80% 50% at 15% -10%, rgba(217,165,90,0.13), transparent 60%),
+      radial-gradient(ellipse 70% 60% at 100% 0%, rgba(95,184,171,0.10), transparent 55%),
+      linear-gradient(180deg, var(--bg-0), var(--bg-1) 40%, var(--bg-0));
+    background-attachment:fixed;
+    color:var(--ink-0);
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  /* subtle grain / vignette texture */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .wrap{max-width:1280px; margin:0 auto; padding:36px 28px 100px; position:relative; z-index:1;}
+
+  /* ---------- Header ---------- */
+  header{
+    display:flex; align-items:flex-end; justify-content:space-between; gap:24px;
+    flex-wrap:wrap; margin-bottom:40px;
+  }
+  .brand{display:flex; align-items:center; gap:16px;}
+  .brand-mark{
+    width:52px; height:52px; border-radius:14px;
+    background:linear-gradient(150deg, var(--amber), #a97a3a);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 8px 24px rgba(217,165,90,0.30), inset 0 1px 0 rgba(255,255,255,0.35);
+    flex-shrink:0;
+  }
+  .brand-mark svg{width:26px; height:26px;}
+  .brand h1{
+    font-family:var(--font-display); font-weight:600; font-size:2rem; letter-spacing:-0.01em;
+    margin:0; color:var(--ink-0);
+  }
+  .brand p{margin:2px 0 0; font-size:0.78rem; letter-spacing:0.14em; text-transform:uppercase; color:var(--amber-soft); font-weight:500;}
+
+  .controls{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+  .search-box{position:relative;}
+  .search-box svg{position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--ink-2); pointer-events:none;}
+  .search-box input{
+    width:250px;
+    background:var(--glass); border:1px solid var(--glass-brd); border-radius:999px;
+    padding:11px 16px 11px 40px; color:var(--ink-0); font-family:var(--font-body); font-size:0.9rem;
+    backdrop-filter:blur(14px);
+    transition:border-color .2s, box-shadow .2s, width .2s;
+  }
+  .search-box input:focus{outline:none; border-color:var(--glass-brd-hi); box-shadow:0 0 0 3px rgba(217,165,90,0.12); width:290px;}
+  .search-box input::placeholder{color:var(--ink-2);}
+
+  .icon-btn{
+    width:42px; height:42px; border-radius:999px; border:1px solid var(--glass-brd);
+    background:var(--glass); color:var(--ink-1); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; backdrop-filter:blur(14px); transition:all .18s ease; flex-shrink:0;
+  }
+  .icon-btn:hover{color:var(--ink-0); border-color:var(--glass-brd-hi); transform:translateY(-2px); background:rgba(255,255,255,0.09);}
+  .icon-btn svg{width:18px; height:18px;}
+
+  .btn-primary{
+    display:flex; align-items:center; gap:8px;
+    background:linear-gradient(135deg, var(--amber), #b8874a);
+    color:#1a1206; font-weight:600; font-size:0.88rem;
+    border:none; border-radius:999px; padding:11px 20px; cursor:pointer;
+    box-shadow:0 6px 20px rgba(217,165,90,0.28);
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .btn-primary:hover{transform:translateY(-2px); box-shadow:0 10px 28px rgba(217,165,90,0.38);}
+  .btn-primary svg{width:17px; height:17px;}
+
+  /* ---------- Stats ---------- */
+  .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px;}
+  .stat-card{
+    background:var(--glass); border:1px solid var(--glass-brd); border-radius:var(--radius);
+    padding:20px 22px; backdrop-filter:blur(16px);
+    display:flex; align-items:center; gap:14px;
+    animation:riseIn .5s ease backwards;
+  }
+  .stat-card .stat-icon{
+    width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .stat-icon svg{width:20px;height:20px;}
+  .stat-num{font-family:var(--font-display); font-size:1.7rem; font-weight:600; line-height:1;}
+  .stat-label{font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-2); margin-top:4px; font-weight:600;}
+
+  /* ---------- Filters ---------- */
+  .filters{display:flex; gap:8px; margin-bottom:28px; flex-wrap:wrap;}
+  .filter-chip{
+    padding:9px 18px; border-radius:999px; font-size:0.85rem; font-weight:500;
+    background:transparent; border:1px solid var(--glass-brd); color:var(--ink-2);
+    cursor:pointer; transition:all .18s ease; font-family:var(--font-body);
+  }
+  .filter-chip:hover{color:var(--ink-0); border-color:var(--glass-brd-hi);}
+  .filter-chip.active{
+    background:rgba(217,165,90,0.14); border-color:var(--glass-brd-hi); color:var(--amber-soft);
+  }
+
+  /* ---------- Grid ---------- */
+  .grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:22px;}
+
+  .card{
+    background:var(--glass); border:1px solid var(--glass-brd); border-radius:var(--radius);
+    overflow:hidden; backdrop-filter:blur(16px);
+    display:flex; flex-direction:column;
+    transition:transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+    animation:riseIn .5s ease backwards;
+  }
+  .card:hover{transform:translateY(-4px); border-color:var(--glass-brd-hi); box-shadow:0 16px 40px rgba(0,0,0,0.35);}
+
+  .card-thumb{position:relative; aspect-ratio:16/9; background:var(--bg-2); overflow:hidden;}
+  .card-thumb img{width:100%; height:100%; object-fit:cover; opacity:0.82; transition:transform .5s ease, opacity .3s;}
+  .card:hover .card-thumb img{transform:scale(1.06); opacity:0.95;}
+  .card-thumb .no-thumb{width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:var(--ink-2);}
+  .card-thumb .no-thumb svg{width:36px;height:36px;}
+
+  a.thumb-overlay { text-decoration:none; }
+  .thumb-overlay{
+    position:absolute; inset:0; background:rgba(11,15,26,0.45); opacity:0; display:flex; align-items:center; justify-content:center;
+    transition:opacity .25s ease; cursor:pointer;
+  }
+  .card-thumb:hover .thumb-overlay{opacity:1;}
+  .thumb-overlay svg{width:56px; height:56px; color:var(--amber-soft); filter:drop-shadow(0 4px 14px rgba(0,0,0,0.5)); transform:scale(0.85); transition:transform .25s ease;}
+  .thumb-overlay:hover svg{transform:scale(1);}
+
+  .card-actions{position:absolute; top:10px; right:10px; display:flex; gap:6px; opacity:0; transition:opacity .2s ease; z-index:2;}
+  .card-thumb:hover .card-actions{opacity:1;}
+  .mini-btn{
+    width:32px; height:32px; border-radius:999px; border:none; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; backdrop-filter:blur(10px); transition:transform .15s ease;
+  }
+  .mini-btn:hover{transform:scale(1.08);}
+  .mini-btn svg{width:15px; height:15px; color:#fff;}
+  .mini-btn.edit{background:rgba(95,184,171,0.75);}
+  .mini-btn.del{background:rgba(217,112,95,0.8);}
+
+  .card-body{padding:18px 20px 20px; display:flex; flex-direction:column; flex:1;}
+  .card-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:4px;}
+  .card-title{
+    font-family:var(--font-display); font-weight:600; font-size:1.12rem; line-height:1.25;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  .card-author{font-size:0.83rem; color:var(--ink-2); margin:2px 0 14px;}
+
+  .badge{
+    flex-shrink:0; padding:4px 10px; border-radius:999px; font-size:0.66rem; font-weight:700;
+    letter-spacing:0.05em; text-transform:uppercase; white-space:nowrap; border:1px solid transparent;
+  }
+  .badge.not-started{background:rgba(139,138,143,0.15); color:var(--ink-2); border-color:rgba(139,138,143,0.3);}
+  .badge.in-progress{background:rgba(95,184,171,0.15); color:var(--teal); border-color:rgba(95,184,171,0.35);}
+  .badge.completed{background:rgba(217,165,90,0.15); color:var(--amber-soft); border-color:rgba(217,165,90,0.35);}
+
+  .progress-row{display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;}
+  .progress-label{font-size:0.66rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-2); font-weight:600;}
+  .progress-pct{font-size:0.78rem; font-weight:600; color:var(--amber-soft); font-family:var(--font-mono);}
+
+  .progress-track{position:relative; width:100%; height:6px; background:rgba(255,255,255,0.08); border-radius:999px; margin-bottom:16px;}
+  .progress-fill{position:absolute; inset:0; height:100%; border-radius:999px; background:linear-gradient(90deg, var(--teal), var(--amber)); transition:width .2s ease;}
+  .progress-track input[type=range]{
+    position:absolute; inset:0; width:100%; height:100%; margin:0; opacity:0; cursor:pointer;
+  }
+
+  .parts-toggle{
+    display:flex; justify-content:space-between; align-items:center; width:100%;
+    background:rgba(255,255,255,0.04); border:1px solid var(--glass-brd); border-radius:10px;
+    padding:9px 12px; color:var(--ink-1); font-size:0.82rem; cursor:pointer; margin-bottom:12px;
+    font-family:var(--font-body); transition:background .2s;
+  }
+  .parts-toggle:hover{color:var(--ink-0); background:rgba(255,255,255,0.08);}
+  .parts-toggle svg{width:15px;height:15px; transition:transform .2s ease;}
+
+  .parts-list{max-height:0; overflow:hidden; transition:max-height .25s ease; margin:-6px 0 6px;}
+  .parts-list.open{max-height:220px; overflow-y:auto; margin-bottom:12px;}
+  .part-row{
+    display:flex; justify-content:space-between; align-items:center; gap:8px;
+    padding:6px 10px; border-radius:8px; background:rgba(255,255,255,0.03); margin-bottom:6px; font-size:0.78rem;
+  }
+  .part-checkbox {
+    display:flex; align-items:center; gap:8px; cursor:pointer; flex:1; min-width:0;
+  }
+  .part-checkbox input[type="checkbox"] {
+    accent-color:var(--amber); margin:0; width:14px; height:14px; flex-shrink:0; cursor:pointer;
+  }
+  .part-checkbox span {
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .part-len {
+    font-size:0.7rem; color:var(--ink-2); font-family:var(--font-mono); margin-left:auto; padding-right:8px; flex-shrink:0;
+  }
+  
+  a.part-play {
+    background:none; border:none; color:var(--amber-soft); cursor:pointer; display:flex; padding:2px; text-decoration:none; flex-shrink:0;
+  }
+  a.part-play svg{width:16px;height:16px; transition:transform .15s;}
+  a.part-play:hover svg{transform:scale(1.15);}
+  a.part-play[disabled]{opacity:0.25; cursor:not-allowed; pointer-events:none;}
+
+  .card-footer{display:flex; justify-content:space-between; align-items:center; padding-top:12px; border-top:1px solid var(--glass-brd); margin-top:auto;}
+  select.status-select{
+    background:transparent; border:none; color:var(--ink-1); font-size:0.82rem; font-family:var(--font-body);
+    cursor:pointer;
+  }
+  select.status-select:focus{outline:none;}
+  select.status-select option{background:var(--bg-1); color:var(--ink-0);}
+
+  a.play-link{
+    display:flex; align-items:center; gap:6px; background:none; border:none; color:var(--amber-soft);
+    font-size:0.82rem; font-weight:600; cursor:pointer; font-family:var(--font-body); text-decoration:none;
+  }
+  a.play-link svg{width:16px;height:16px;}
+  a.play-link[disabled]{opacity:0.3; cursor:not-allowed; pointer-events:none;}
+
+  /* ---------- Empty state ---------- */
+  .empty-state{
+    grid-column:1/-1; padding:80px 20px; display:flex; flex-direction:column; align-items:center;
+    text-align:center; color:var(--ink-2);
+  }
+  .empty-state svg{width:52px; height:52px; margin-bottom:16px; opacity:0.4;}
+  .empty-state h3{font-family:var(--font-display); font-size:1.3rem; color:var(--ink-1); margin:0 0 6px; font-weight:500;}
+  .empty-state p{font-size:0.88rem; max-width:360px; margin:0;}
+
+  /* ---------- Modal shared ---------- */
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(6,8,14,0.7); backdrop-filter:blur(6px);
+    display:flex; align-items:center; justify-content:center; padding:20px; z-index:100;
+    animation:fadeIn .2s ease;
+  }
+  .modal-card{
+    width:100%; max-width:640px; max-height:88vh; overflow-y:auto;
+    background:linear-gradient(180deg, rgba(26,36,56,0.92), rgba(18,26,43,0.96));
+    border:1px solid var(--glass-brd-hi); border-radius:20px; backdrop-filter:blur(24px);
+    box-shadow:0 30px 80px rgba(0,0,0,0.5);
+    animation:popIn .25s cubic-bezier(.2,.9,.3,1.2);
+  }
+  .modal-head{
+    display:flex; justify-content:space-between; align-items:center; padding:22px 24px 18px;
+    border-bottom:1px solid var(--glass-brd); position:sticky; top:0;
+    background:linear-gradient(180deg, rgba(26,36,56,0.95), rgba(26,36,56,0.85)); backdrop-filter:blur(20px); z-index:2;
+  }
+  .modal-head h2{font-family:var(--font-display); font-weight:600; font-size:1.4rem; margin:0;}
+  .modal-close{background:none; border:none; color:var(--ink-2); cursor:pointer; padding:4px; display:flex;}
+  .modal-close:hover{color:var(--ink-0);}
+  .modal-close svg{width:22px;height:22px;}
+
+  .modal-body{padding:22px 24px 6px;}
+  .field{margin-bottom:18px;}
+  .field label{display:block; font-size:0.78rem; font-weight:600; color:var(--ink-1); margin-bottom:7px; letter-spacing:0.02em;}
+  .field input[type=text], .field input[type=url]{
+    width:100%; background:rgba(255,255,255,0.04); border:1px solid var(--glass-brd); border-radius:10px;
+    padding:11px 14px; color:var(--ink-0); font-family:var(--font-body); font-size:0.92rem; transition:border-color .2s;
+  }
+  .field input:focus{outline:none; border-color:var(--glass-brd-hi);}
+  .field input::placeholder{color:var(--ink-2);}
+
+  .parts-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;}
+  .parts-head label{font-size:0.85rem; font-weight:600; color:var(--ink-0);}
+  .add-part-btn{
+    display:flex; align-items:center; gap:5px; background:rgba(217,165,90,0.12); border:1px solid rgba(217,165,90,0.3);
+    color:var(--amber-soft); font-size:0.76rem; font-weight:600; padding:6px 11px; border-radius:8px; cursor:pointer;
+  }
+  .add-part-btn svg{width:13px;height:13px;}
+
+  .part-form{
+    position:relative; background:rgba(255,255,255,0.03); border:1px solid var(--glass-brd); border-radius:12px;
+    padding:14px; margin-bottom:12px;
+  }
+  .part-form-grid{display:grid; grid-template-columns:1.2fr 0.8fr 2fr; gap:10px;}
+  .part-form input{
+    width:100%; background:rgba(0,0,0,0.2); border:1px solid var(--glass-brd); border-radius:8px;
+    padding:8px 10px; color:var(--ink-0); font-size:0.82rem; font-family:var(--font-body);
+  }
+  .part-form input:focus{outline:none; border-color:var(--glass-brd-hi);}
+  .link-field{position:relative;}
+  .link-field svg{position:absolute; left:9px; top:50%; transform:translateY(-50%); width:13px;height:13px; color:var(--ink-2);}
+  .link-field input{padding-left:28px;}
+  .remove-part{
+    position:absolute; top:-8px; right:-8px; width:22px; height:22px; border-radius:999px;
+    background:var(--danger); border:none; color:#fff; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; opacity:0; transition:opacity .18s ease;
+  }
+  .part-form:hover .remove-part{opacity:1;}
+  .remove-part svg{width:12px;height:12px;}
+  .valid-tag{margin-top:8px; font-size:0.72rem; color:var(--teal); display:flex; align-items:center; gap:5px;}
+  .valid-tag svg{width:12px;height:12px;}
+
+  .modal-foot{
+    display:flex; justify-content:flex-end; gap:10px; padding:18px 24px 24px;
+    position:sticky; bottom:0; background:linear-gradient(0deg, rgba(18,26,43,0.96), rgba(18,26,43,0.7));
+  }
+  .btn-ghost{
+    background:none; border:1px solid var(--glass-brd); color:var(--ink-1); padding:10px 18px; border-radius:999px;
+    font-size:0.86rem; font-weight:500; cursor:pointer; font-family:var(--font-body);
+  }
+  .btn-ghost:hover{color:var(--ink-0); border-color:rgba(255,255,255,0.25);}
+
+  @keyframes riseIn{from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);}}
+  @keyframes fadeIn{from{opacity:0;} to{opacity:1;}}
+  @keyframes popIn{from{opacity:0; transform:scale(0.94) translateY(10px);} to{opacity:1; transform:scale(1) translateY(0);}}
+
+  ::-webkit-scrollbar{width:8px; height:8px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15); border-radius:8px;}
+  ::-webkit-scrollbar-thumb:hover{background:rgba(217,165,90,0.4);}
+
+  .toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:rgba(26,36,56,0.95); border:1px solid var(--glass-brd-hi); color:var(--ink-0);
+    padding:12px 22px; border-radius:999px; font-size:0.85rem; backdrop-filter:blur(16px);
+    box-shadow:0 12px 30px rgba(0,0,0,0.4); z-index:200; opacity:0; pointer-events:none; transition:all .3s ease;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto;}
+
+  @media (max-width:640px){
+    .wrap{padding:24px 16px 90px;}
+    header{flex-direction:column; align-items:stretch;}
+    .controls{justify-content:space-between;}
+    .search-box, .search-box input{width:100%;}
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .part-form-grid{grid-template-columns:1fr;}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:0.001s !important; transition-duration:0.001s !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#1a1206" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      </div>
+      <div>
+        <h1>Athenaeum</h1>
+        <p>Your audiobook shelf</p>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" id="searchInput" placeholder="Search title or author…" />
+      </div>
+      <input type="file" id="importFile" accept=".json" style="display:none" />
+      <button class="icon-btn" id="importBtn" title="Restore backup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </button>
+      <button class="icon-btn" id="exportBtn" title="Download backup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </button>
+      <button class="btn-primary" id="addBookBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Book
+      </button>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div class="stat-card" style="animation-delay:.02s">
+      <div class="stat-icon" style="background:rgba(217,165,90,0.14); color:var(--amber-soft);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      </div>
+      <div><div class="stat-num" id="statTotal">0</div><div class="stat-label">On the shelf</div></div>
+    </div>
+    <div class="stat-card" style="animation-delay:.06s">
+      <div class="stat-icon" style="background:rgba(95,184,171,0.14); color:var(--teal);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div><div class="stat-num" id="statProgress">0</div><div class="stat-label">Listening</div></div>
+    </div>
+    <div class="stat-card" style="animation-delay:.1s">
+      <div class="stat-icon" style="background:rgba(139,138,143,0.14); color:var(--ink-1);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+      </div>
+      <div><div class="stat-num" id="statNotStarted">0</div><div class="stat-label">Not started</div></div>
+    </div>
+    <div class="stat-card" style="animation-delay:.14s">
+      <div class="stat-icon" style="background:rgba(217,165,90,0.14); color:var(--amber-soft);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <div><div class="stat-num" id="statDone">0</div><div class="stat-label">Finished</div></div>
+    </div>
+  </div>
+
+  <div class="filters" id="filters">
+    <button class="filter-chip active" data-filter="all">All</button>
+    <button class="filter-chip" data-filter="not-started">Not Started</button>
+    <button class="filter-chip" data-filter="in-progress">Listening</button>
+    <button class="filter-chip" data-filter="completed">Finished</button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- State ---------------- */
+  const STORAGE_KEY = "athenaeum_audiobooks_v2";
+  let books = [];
+  let searchQuery = "";
+  let filter = "all";
+  let editingBookId = null;
+  let editParts = [];
+  const openPartLists = new Set(); // Tracks which part lists are expanded
+
+  const seedBooks = [
+    {
+      id: "seed-1",
+      title: "The Great Gatsby",
+      author: "F. Scott Fitzgerald",
+      parts: [{ id:"p1", title:"Full Audiobook", ytLink:"https://www.youtube.com/watch?v=0hJW2n0iP6Y", ytId:"0hJW2n0iP6Y", length:"4h 46m", completed: false }],
+      status: "in-progress", progress: 45, addedAt: new Date().toISOString()
+    },
+    {
+      id: "seed-2",
+      title: "The Count of Monte Cristo",
+      author: "Alexandre Dumas",
+      parts: [
+        { id:"p1", title:"Part 1 (Ch 1-10)", ytLink:"https://www.youtube.com/watch?v=scqItNxhuwg", ytId:"scqItNxhuwg", length:"5h 12m", completed: false },
+        { id:"p2", title:"Part 2 (Ch 11-20)", ytLink:"https://www.youtube.com/watch?v=5897dMWJiSM", ytId:"5897dMWJiSM", length:"4h 58m", completed: false }
+      ],
+      status: "not-started", progress: 0, addedAt: new Date(Date.now()-86400000).toISOString()
+    }
+  ];
+
+  /* ---------------- Persistence ---------------- */
+  function loadBooks(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        const parsed = JSON.parse(raw);
+        if(Array.isArray(parsed)) return parsed;
+      }
+    }catch(e){ console.warn("Could not load saved library", e); }
+    return seedBooks.slice();
+  }
+
+  function saveBooks(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(books));
+    }catch(e){ console.warn("Could not save library", e); }
+  }
+
+  /* ---------------- Utilities ---------------- */
+  function extractYouTubeId(url){
+    if(!url) return null;
+    const re = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+    const m = url.match(re);
+    return m ? m[1] : null;
+  }
+  function thumbUrl(id){ return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : null; }
+  function uid(){ return Math.random().toString(36).slice(2,10) + Date.now().toString(36); }
+  function esc(str){
+    const d = document.createElement("div");
+    d.textContent = str == null ? "" : String(str);
+    return d.innerHTML;
+  }
+  function showToast(msg){
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(showToast._tm);
+    showToast._tm = setTimeout(()=> t.classList.remove("show"), 2200);
+  }
+
+  const statusLabel = { "not-started":"Not Started", "in-progress":"Listening", "completed":"Finished" };
+
+  /* ---------------- Rendering ---------------- */
+  function render(){
+    renderStats();
+    renderGrid();
+  }
+
+  function renderStats(){
+    document.getElementById("statTotal").textContent = books.length;
+    document.getElementById("statProgress").textContent = books.filter(b=>b.status==="in-progress").length;
+    document.getElementById("statNotStarted").textContent = books.filter(b=>b.status==="not-started").length;
+    document.getElementById("statDone").textContent = books.filter(b=>b.status==="completed").length;
+  }
+
+  function getDisplayedBooks(){
+    const q = searchQuery.trim().toLowerCase();
+    return books
+      .filter(b=>{
+        const matchesSearch = !q || b.title.toLowerCase().includes(q) || (b.author||"").toLowerCase().includes(q);
+        const matchesFilter = filter === "all" || b.status === filter;
+        return matchesSearch && matchesFilter;
+      })
+      .sort((a,b)=> new Date(b.addedAt) - new Date(a.addedAt));
+  }
+
+  function renderGrid(){
+    const grid = document.getElementById("grid");
+    const list = getDisplayedBooks();
+
+    if(list.length === 0){
+      grid.innerHTML = `
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <h3>The shelf is quiet</h3>
+          <p>Add a book to start tracking, or restore a backup file to bring your library back.</p>
+        </div>`;
+      return;
+    }
+
+    grid.innerHTML = list.map((book, i)=> cardTemplate(book, i)).join("");
+  }
+
+  function cardTemplate(book, idx){
+    const mainPart = (book.parts && book.parts[0]) || null;
+    const thumb = mainPart ? thumbUrl(mainPart.ytId) : null;
+    const hasParts = book.parts && book.parts.length > 1;
+
+    let progressHTML = "";
+    let partsHTML = "";
+
+    if (hasParts) {
+      // Calculate progress automatically based on checked parts
+      const completedCount = book.parts.filter(p => p.completed).length;
+      const autoProgress = Math.round((completedCount / book.parts.length) * 100);
+      book.progress = autoProgress; // Keep data synced for rendering
+
+      progressHTML = `
+        <div class="progress-row">
+          <span class="progress-label">Progress</span>
+          <span class="progress-pct">${autoProgress}%</span>
+        </div>
+        <div class="progress-track" style="pointer-events:none; opacity:0.75;">
+          <div class="progress-fill" style="width:${autoProgress}%"></div>
+        </div>
+      `;
+
+      const isOpen = openPartLists.has(book.id);
+      partsHTML = `
+        <button class="parts-toggle" data-toggle-parts="${book.id}">
+          <span>${book.parts.length} Parts (${completedCount} done)</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform: ${isOpen ? 'rotate(180deg)' : 'rotate(0deg)'}"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="parts-list ${isOpen ? 'open' : ''}" id="parts-${book.id}">
+          ${book.parts.map((p,i)=>`
+            <div class="part-row">
+              <label class="part-checkbox">
+                <input type="checkbox" data-part-check="${book.id}|${p.id}" ${p.completed ? 'checked' : ''} />
+                <span title="${esc(p.title)}">${i+1}. ${esc(p.title)}</span>
+              </label>
+              ${p.length ? `<span class="part-len">${esc(p.length)}</span>` : ""}
+              <a href="${p.ytLink}" target="_blank" class="part-play" ${!p.ytId ? "disabled":""} title="Play on YouTube">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+              </a>
+            </div>`).join("")}
+        </div>`;
+    } else {
+      // For books with a single part, keep the slider but show the length
+      const lengthLabel = mainPart && mainPart.length ? ` (Length: ${esc(mainPart.length)})` : "";
+      progressHTML = `
+        <div class="progress-row">
+          <span class="progress-label">Progress${lengthLabel}</span>
+          <span class="progress-pct">${book.progress}%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:${book.progress}%"></div>
+          <input type="range" min="0" max="100" value="${book.progress}" data-progress="${book.id}" />
+        </div>
+      `;
+    }
+
+    return `
+      <div class="card" style="animation-delay:${Math.min(idx*0.04,0.4)}s" data-book-id="${book.id}">
+        <div class="card-thumb">
+          ${thumb
+            ? `<img src="${thumb}" alt="${esc(book.title)}" loading="lazy" />`
+            : `<div class="no-thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>`
+          }
+          ${mainPart && mainPart.ytId ? `
+          <a href="${esc(mainPart.ytLink)}" target="_blank" class="thumb-overlay" title="Play on YouTube">
+            <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+          </a>` : ""}
+          <div class="card-actions">
+            <button class="mini-btn edit" data-edit="${book.id}" title="Edit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
+            </button>
+            <button class="mini-btn del" data-delete="${book.id}" title="Delete">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="card-top">
+            <h3 class="card-title" title="${esc(book.title)}">${esc(book.title)}</h3>
+            <span class="badge ${book.status}">${statusLabel[book.status]}</span>
+          </div>
+          <p class="card-author">${esc(book.author || "Unknown Author")}</p>
+
+          ${progressHTML}
+          ${partsHTML}
+
+          <div class="card-footer">
+            <select class="status-select" data-status="${book.id}">
+              <option value="not-started" ${book.status==="not-started"?"selected":""}>Not Started</option>
+              <option value="in-progress" ${book.status==="in-progress"?"selected":""}>Listening</option>
+              <option value="completed" ${book.status==="completed"?"selected":""}>Completed</option>
+            </select>
+            <a href="${esc(mainPart&&mainPart.ytLink||'#')}" target="${mainPart&&mainPart.ytLink ? '_blank' : '_self'}" class="play-link" ${!(mainPart&&mainPart.ytId) ? "disabled":""}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+              Play${hasParts ? " Part 1" : ""}
+            </a>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  /* ---------------- Grid event delegation ---------------- */
+  document.getElementById("grid").addEventListener("click", (e)=>{
+    const editEl = e.target.closest("[data-edit]");
+    if(editEl){ openBookModal(editEl.getAttribute("data-edit")); return; }
+
+    const delEl = e.target.closest("[data-delete]");
+    if(delEl){ deleteBook(delEl.getAttribute("data-delete")); return; }
+
+    const toggleEl = e.target.closest("[data-toggle-parts]");
+    if(toggleEl){
+      const id = toggleEl.getAttribute("data-toggle-parts");
+      if (openPartLists.has(id)) openPartLists.delete(id);
+      else openPartLists.add(id);
+      renderGrid();
+      return;
+    }
+  });
+
+  document.getElementById("grid").addEventListener("input", (e)=>{
+    const rangeEl = e.target.closest("[data-progress]");
+    if(rangeEl){
+      const id = rangeEl.getAttribute("data-progress");
+      updateSinglePartProgress(id, parseInt(rangeEl.value, 10));
+    }
+  });
+
+  document.getElementById("grid").addEventListener("change", (e)=>{
+    const selectEl = e.target.closest("[data-status]");
+    if(selectEl){
+      const id = selectEl.getAttribute("data-status");
+      updateStatus(id, selectEl.value);
+      return;
+    }
+
+    const checkEl = e.target.closest("[data-part-check]");
+    if(checkEl){
+      const [bookId, partId] = checkEl.getAttribute("data-part-check").split("|");
+      togglePartCompletion(bookId, partId, checkEl.checked);
+    }
+  });
+
+  /* ---------------- Book operations ---------------- */
+  function updateSinglePartProgress(id, val){
+    const book = books.find(b=>b.id===id);
+    if(!book) return;
+    book.progress = val;
+    if(val === 100) book.status = "completed";
+    else if(val > 0 && val < 100) book.status = "in-progress";
+    else book.status = "not-started";
+    saveBooks();
+    render();
+  }
+
+  function togglePartCompletion(bookId, partId, isCompleted){
+    const book = books.find(b=>b.id===bookId);
+    if(!book) return;
+    const part = book.parts.find(p=>p.id===partId);
+    if(part) part.completed = isCompleted;
+
+    const completedCount = book.parts.filter(p=>p.completed).length;
+    book.progress = Math.round((completedCount / book.parts.length) * 100);
+
+    if(book.progress === 100) book.status = "completed";
+    else if(book.progress > 0) book.status = "in-progress";
+    else book.status = "not-started";
+
+    saveBooks();
+    render();
+  }
+
+  function updateStatus(id, status){
+    const book = books.find(b=>b.id===id);
+    if(!book) return;
+    book.status = status;
+    if(status === "completed") {
+      book.progress = 100;
+      book.parts.forEach(p => p.completed = true);
+    }
+    if(status === "not-started") {
+      book.progress = 0;
+      book.parts.forEach(p => p.completed = false);
+    }
+    saveBooks();
+    render();
+  }
+
+  function deleteBook(id){
+    const book = books.find(b=>b.id===id);
+    if(!book) return;
+    if(!confirm(`Remove "${book.title}" from your shelf?`)) return;
+    books = books.filter(b=>b.id !== id);
+    saveBooks();
+    render();
+    showToast("Book removed");
+  }
+
+  /* ---------------- Search & filters ---------------- */
+  document.getElementById("searchInput").addEventListener("input", (e)=>{
+    searchQuery = e.target.value;
+    renderGrid();
+  });
+
+  document.getElementById("filters").addEventListener("click", (e)=>{
+    const chip = e.target.closest(".filter-chip");
+    if(!chip) return;
+    filter = chip.getAttribute("data-filter");
+    document.querySelectorAll(".filter-chip").forEach(c=>c.classList.remove("active"));
+    chip.classList.add("active");
+    renderGrid();
+  });
+
+  /* ---------------- Add/Edit modal ---------------- */
+  function openBookModal(bookId){
+    editingBookId = bookId || null;
+    const book = bookId ? books.find(b=>b.id===bookId) : null;
+    editParts = book && book.parts && book.parts.length
+      ? book.parts.map(p=>({ id:p.id, title:p.title, url:p.ytLink, ytId:p.ytId, length:p.length||"", completed:p.completed||false }))
+      : [{ id: uid(), title:"Part 1", url:"", ytId:null, length:"", completed:false }];
+
+    const backdrop = document.createElement("div");
+    backdrop.className = "modal-backdrop";
+    backdrop.id = "bookModalBackdrop";
+    backdrop.innerHTML = `
+      <div class="modal-card">
+        <div class="modal-head">
+          <h2>${book ? "Edit Audiobook" : "Add Audiobook"}</h2>
+          <button class="modal-close" id="closeModalBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <form id="bookForm">
+          <div class="modal-body">
+            <div class="field">
+              <label>Book Title *</label>
+              <input type="text" id="titleInput" required placeholder="e.g. The Count of Monte Cristo" value="${esc(book ? book.title : "")}" />
+            </div>
+            <div class="field">
+              <label>Author (optional)</label>
+              <input type="text" id="authorInput" placeholder="e.g. Alexandre Dumas" value="${esc(book ? book.author : "")}" />
+            </div>
+            <div class="parts-head">
+              <label>Audiobook Parts / Links *</label>
+              <button type="button" class="add-part-btn" id="addPartBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Part
+              </button>
+            </div>
+            <div id="partsContainer"></div>
+          </div>
+          <div class="modal-foot">
+            <button type="button" class="btn-ghost" id="cancelModalBtn">Cancel</button>
+            <button type="submit" class="btn-primary" style="border-radius:10px;">${book ? "Update Audiobook" : "Save Audiobook"}</button>
+          </div>
+        </form>
+      </div>`;
+    document.body.appendChild(backdrop);
+    document.body.style.overflow = "hidden";
+
+    renderPartsForm();
+
+    function close(){
+      backdrop.remove();
+      document.body.style.overflow = "";
+      editingBookId = null;
+    }
+    backdrop.addEventListener("click", (e)=>{ if(e.target === backdrop) close(); });
+    document.getElementById("closeModalBtn").addEventListener("click", close);
+    document.getElementById("cancelModalBtn").addEventListener("click", close);
+    document.getElementById("addPartBtn").addEventListener("click", ()=>{
+      editParts.push({ id: uid(), title:`Part ${editParts.length+1}`, url:"", ytId:null, length:"", completed:false });
+      renderPartsForm();
+    });
+
+    document.getElementById("bookForm").addEventListener("submit", (e)=>{
+      e.preventDefault();
+      const title = document.getElementById("titleInput").value.trim();
+      const author = document.getElementById("authorInput").value.trim();
+      if(!title) return;
+
+      const cleanParts = editParts
+        .filter(p=>p.url && p.url.trim() !== "")
+        .map(p=>({ id:p.id, title:p.title || "Untitled Part", ytLink:p.url, ytId:p.ytId, length:p.length||"", completed:p.completed||false }));
+
+      if(cleanParts.length === 0){
+        showToast("Add at least one valid YouTube link");
+        return;
+      }
+
+      if(book){
+        book.title = title;
+        book.author = author || "Unknown Author";
+        book.parts = cleanParts;
+        
+        // Recalculate progress in case parts were removed/added
+        if (cleanParts.length > 1) {
+            const completedCount = cleanParts.filter(p=>p.completed).length;
+            book.progress = Math.round((completedCount / cleanParts.length) * 100);
+            if(book.progress === 100) book.status = "completed";
+            else if(book.progress > 0) book.status = "in-progress";
+            else book.status = "not-started";
+        }
+      } else {
+        books.unshift({
+          id: uid(),
+          title,
+          author: author || "Unknown Author",
+          parts: cleanParts,
+          status: "not-started",
+          progress: 0,
+          addedAt: new Date().toISOString()
+        });
+      }
+      saveBooks();
+      render();
+      showToast(book ? "Audiobook updated" : "Audiobook added");
+      close();
+    });
+  }
+
+  function renderPartsForm(){
+    const container = document.getElementById("partsContainer");
+    if(!container) return;
+    container.innerHTML = editParts.map((p, i)=>`
+      <div class="part-form" data-part-id="${p.id}">
+        ${editParts.length > 1 ? `
+        <button type="button" class="remove-part" data-remove-part="${p.id}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>` : ""}
+        <div class="part-form-grid">
+          <input type="text" placeholder="Part Title" value="${esc(p.title)}" data-part-title="${p.id}" />
+          <input type="text" placeholder="Length (e.g. 1h 20m)" value="${esc(p.length)}" data-part-length="${p.id}" />
+          <div class="link-field">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            <input type="url" placeholder="YouTube URL" value="${esc(p.url)}" data-part-url="${p.id}" />
+          </div>
+        </div>
+        ${p.ytId ? `<div class="valid-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Valid video found</div>` : ""}
+      </div>`).join("");
+
+    container.querySelectorAll("[data-part-title]").forEach(inp=>{
+      inp.addEventListener("input", (e)=>{
+        const id = e.target.getAttribute("data-part-title");
+        const part = editParts.find(p=>p.id===id);
+        if(part) part.title = e.target.value;
+      });
+    });
+    container.querySelectorAll("[data-part-length]").forEach(inp=>{
+      inp.addEventListener("input", (e)=>{
+        const id = e.target.getAttribute("data-part-length");
+        const part = editParts.find(p=>p.id===id);
+        if(part) part.length = e.target.value;
+      });
+    });
+    container.querySelectorAll("[data-part-url]").forEach(inp=>{
+      inp.addEventListener("input", (e)=>{
+        const id = e.target.getAttribute("data-part-url");
+        const part = editParts.find(p=>p.id===id);
+        if(!part) return;
+        part.url = e.target.value;
+        const newYtId = extractYouTubeId(e.target.value);
+        const changed = newYtId !== part.ytId;
+        part.ytId = newYtId;
+
+        const isFirst = editParts[0].id === id;
+        const titleInput = document.getElementById("titleInput");
+        if(isFirst && newYtId && titleInput && !titleInput.value.trim()){
+          fetchYouTubeMeta(e.target.value);
+        }
+        if(changed) renderPartsForm();
+      });
+    });
+    container.querySelectorAll("[data-remove-part]").forEach(btn=>{
+      btn.addEventListener("click", (e)=>{
+        const id = e.target.closest("[data-remove-part]").getAttribute("data-remove-part");
+        if(editParts.length > 1){
+          editParts = editParts.filter(p=>p.id !== id);
+          renderPartsForm();
+        }
+      });
+    });
+  }
+
+  async function fetchYouTubeMeta(url){
+    try{
+      const res = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`);
+      if(!res.ok) return;
+      const data = await res.json();
+      const titleInput = document.getElementById("titleInput");
+      const authorInput = document.getElementById("authorInput");
+      if(titleInput && !titleInput.value.trim() && data.title) titleInput.value = data.title;
+      if(authorInput && !authorInput.value.trim() && data.author_name) authorInput.value = data.author_name;
+    }catch(err){ /* silently ignore */ }
+  }
+
+  document.getElementById("addBookBtn").addEventListener("click", ()=> openBookModal(null));
+
+  /* ---------------- Import / Export ---------------- */
+  document.getElementById("exportBtn").addEventListener("click", ()=>{
+    const dataStr = JSON.stringify(books, null, 2);
+    const blob = new Blob([dataStr], { type:"application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "athenaeum_backup.json";
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast("Backup downloaded");
+  });
+
+  document.getElementById("importBtn").addEventListener("click", ()=>{
+    document.getElementById("importFile").click();
+  });
+
+  document.getElementById("importFile").addEventListener("change", (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev)=>{
+      try{
+        const imported = JSON.parse(ev.target.result);
+        if(!Array.isArray(imported)) throw new Error("Backup file must contain an array");
+        const existingIds = new Set(books.map(b=>b.id));
+        imported.forEach(b=>{
+          if(!b.id || existingIds.has(b.id)) b.id = uid();
+          if(!b.addedAt) b.addedAt = new Date().toISOString();
+          if(!b.parts) b.parts = [];
+          
+          // Map imported parts to have completed field if missing
+          b.parts = b.parts.map(p => ({
+            ...p,
+            length: p.length || "",
+            completed: p.completed || false
+          }));
+
+          if(!b.status) b.status = "not-started";
+          if(typeof b.progress !== "number") b.progress = 0;
+          books.unshift(b);
+        });
+        saveBooks();
+        render();
+        showToast(`Imported ${imported.length} book(s)`);
+      }catch(err){
+        showToast("Couldn't read that backup file");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = null;
+  });
+
+  /* ---------------- Init ---------------- */
+  books = loadBooks();
+  render();
+
+})();
+</script>
+</body>
+</html>
